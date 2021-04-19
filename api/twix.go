@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math/rand"
@@ -28,13 +29,18 @@ const (
 func Handler(w http.ResponseWriter, r *http.Request) {
 	data, err := fetchMedia()
 	if err != nil {
+		fmt.Printf("Failed to fetch media\n")
 		panic(err)
 	}
 
-	image, err := http.Get(randomMediaUrl(data))
+	url := randomMediaUrl(data)
+	image, err := http.Get(url)
 	if err != nil {
+		fmt.Printf("Failed to load image: %v\n", url)
 		panic(err)
 	}
+
+	fmt.Printf("Serving image: %v, bytes: %fmb\n", url, float64(image.ContentLength) * 0.000001)
 
 	defer image.Body.Close()
 	io.Copy(w, image.Body)
